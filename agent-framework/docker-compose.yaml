@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
   npm:
     container_name: nginx-proxy-manager
@@ -20,15 +18,19 @@ services:
     ports:
       - "5678:5678"
     environment:
-      - N8N_HOST=${N8N_HOST}
-      - N8N_PORT=5678 ## Change if you have chose another port
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
+      - N8N_PORT=5678
       - N8N_PROTOCOL=https
+      - N8N_RUNNERS_ENABLED=true
       - NODE_ENV=production
-      - WEBHOOK_URL=https://${N8N_HOST}/ ## Change if you want another URL for your webhooks
-      - GENERIC_TIMEZONE=${N8N_GENERIC_TIMEZONE}
+      - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - TZ=${GENERIC_TIMEZONE}
     volumes:
       - n8n_data:/home/node/.n8n
-      - /local-files:/files
+      - ./local-files:/files
+
 
   openwebui:
     container_name: open-webui
@@ -50,7 +52,6 @@ services:
 
 volumes:
   n8n_data:
-    external: true
   open-webui:
     external: true
 
