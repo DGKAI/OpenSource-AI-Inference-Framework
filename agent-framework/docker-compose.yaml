@@ -27,9 +27,10 @@ services:
       - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
       - TZ=${GENERIC_TIMEZONE}
+      - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE}
     volumes:
       - n8n_data:/home/node/.n8n
-      - ./local-files:/files
+      - ./docker-volumes/n8n/local-files:/files
 
 
   openwebui:
