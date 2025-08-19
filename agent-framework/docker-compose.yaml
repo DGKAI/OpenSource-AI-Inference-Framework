@@ -1,0 +1,58 @@
+version: "3.7"
+
+services:
+  npm:
+    container_name: nginx-proxy-manager
+    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    volumes:
+      - ./docker-volumes/npm:/data
+      - ./docker-volumes/npm/letsencrypt:/etc/letsencrypt
+
+  n8n:
+    container_name: n8n
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=5678 ## Change if you have chose another port
+      - N8N_PROTOCOL=https
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://${N8N_HOST}/ ## Change if you want another URL for your webhooks
+      - GENERIC_TIMEZONE=${N8N_GENERIC_TIMEZONE}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - /local-files:/files
+
+  openwebui:
+    container_name: open-webui
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker-volumes/open-webui:/app/backend/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - WEBUI_AUTH=${OPENWEBUI_AUTH}
+      - ENABLE_LOGIN_FORM=${OPENWEBUI_ENABLE_LOGIN_FORM}
+      - MILVUS_URI=${MILVUS_URI}
+      - MILVUS_TOKEN=${MILVUS_TOKEN}
+      - MILVUS_DB=${MILVUS_DB}
+      - VECTOR_DB=${VECTOR_DB}
+    restart: always
+
+volumes:
+  n8n_data:
+    external: true
+  open-webui:
+    external: true
+
+include:
+  - ../milvus/docker-compose.yaml
